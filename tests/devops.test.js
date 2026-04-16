@@ -12,7 +12,9 @@ const validBody = {
   timeToLifeSec: 45
 };
 
-const token = require("../scripts/generate-jwt.js")
+const tokenJWT = require("../scripts/generate-jwt.js");
+const myToken = tokenJWT();
+
 const generateToken = () => {
   return jwt.sign(
     { transactionId: 'test-transaction', iat: Math.floor(Date.now() / 1000) },
@@ -28,7 +30,7 @@ describe("DevOps API", () => {
     const res = await request(app)
       .post("/DevOps")
       .set("X-Parse-REST-API-Key", apiKey)
-      .set("X-JWT-KWY", generateToken())
+      .set("X-JWT-KWY", myToken)
       .send(validBody);
 
     expect(res.statusCode).toBe(200);
