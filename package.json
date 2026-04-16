@@ -17,7 +17,8 @@
     "joi": "^17.9.2",
     "helmet": "^7.0.0",
     "express-rate-limit": "^7.0.0",
-    "pino": "^8.0.0"
+    "pino": "^8.0.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",
