@@ -12,6 +12,7 @@ const validBody = {
   timeToLifeSec: 45
 };
 
+const token = require("../scripts/generate-jwt.js")
 const generateToken = () => {
   return jwt.sign(
     { transactionId: 'test-transaction', iat: Math.floor(Date.now() / 1000) },
