@@ -1,0 +1,21 @@
+version: '3'
+services:
+  app1:
+    build: .
+    environment:
+      - API_KEY=2f5ae96c-b558-4c7b-a590-a501ae1c3f6c
+      - JWT_SECRET=supersecret
+  app2:
+    build: .
+    environment:
+      - API_KEY=2f5ae96c-b558-4c7b-a590-a501ae1c3f6c
+      - JWT_SECRET=supersecret
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app1
+      - app2
