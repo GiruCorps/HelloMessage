@@ -13,14 +13,22 @@ const { v4: uuidv4 } = require('uuid');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 
-const token = jwt.sign(
-  {
-    transactionId: uuidv4(),
-    iat: Math.floor(Date.now() / 1000)
-  },
-  JWT_SECRET,
-  { expiresIn: '5m' }
-);
+const generateToken = () => {
+  return jwt.sign(
+    {
+      transactionId: uuidv4(),
+      iat: Math.floor(Date.now() / 1000)
+    },
+    JWT_SECRET,
+    { expiresIn: '5m' }
+  );
+};
+
+if (require.main === module) {
+  process.stdout.write(generateToken() + '\n');
+}
+
+module.exports = generateToken;
 
 // Output only the token (compatible with shell variable capture)
-process.stdout.write(token + '\n');
+//process.stdout.write(token + '\n');
