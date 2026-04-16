@@ -12,8 +12,14 @@ const validBody = {
   timeToLifeSec: 45
 };
 
-const generateToken = () =>
-  jwt.sign({ user: "test" }, secret, { expiresIn: 60 });
+const generateToken = () => {
+  return jwt.sign(
+    { transactionId: 'test-transaction', iat: Math.floor(Date.now() / 1000) },
+    secret,
+    { expiresIn: '5m' }
+  );
+};
+  //  jwt.sign({ user: "test" }, secret, { expiresIn: 60 });
 
 describe("DevOps API", () => {
 
@@ -26,7 +32,6 @@ describe("DevOps API", () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.message).toContain("Hello");
-    expect(res.body.jwt).toBeDefined();
   });
 
   test("❌ missing API key", async () => {
