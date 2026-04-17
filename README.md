@@ -50,7 +50,40 @@ Internet → Nginx (Load Balancer) → App Node 1
 }
 ```
 
-Any other HTTP method returns `ERROR` with status `405`.
+### `GET /health`
+
+**Headers required:**
+
+NONE
+
+**Request body:**
+NONE
+
+**Response:**
+```json
+{
+  "status":"ok"
+}
+```
+
+
+### `GET /balancer`
+
+**Headers required:**
+
+NONE
+
+**Request body:**
+NONE
+
+**Response:**
+```json
+{
+  "host":"$(HOSTNAME)"
+}
+```
+
+Any other HTTP method returns `ERROR` with status `401`.
 
 ---
 
@@ -108,15 +141,13 @@ Coverage threshold: **80%** (branches, functions, lines, statements).
 ```
 Push to master
   ↓
-1. Build & Lint (ESLint static analysis)
+1. Lint & Test (ESLint static analysis + Jest + Coverage report)
   ↓
-2. Test (Jest + Coverage report)
+2. Docker Build & Push → GitHub Container Registry
   ↓
-3. Docker Build & Push → GitHub Container Registry
+3. Deploy → Develop (SSH)
   ↓
-4. Deploy → Staging (SSH + smoke test)
-  ↓
-5. Deploy → Production (auto after staging passes)
+4. Deploy → Production (auto after code merges to main)
 ```
 ---
 
