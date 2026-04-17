@@ -1,0 +1,180 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Kubernetes Deployment — DevOps Microservice
+# Includes: Deployment, HPA (auto-scaling), Service, Ingress, ConfigMap, Secret
+# ─────────────────────────────────────────────────────────────────────────────
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: devops-microservice
+
+---
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: devops-config
+  namespace: devops-microservice
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+
+---
+# Secret (base64-encode your values)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: devops-secrets
+  namespace: devops-microservice
+type: Opaque
+stringData:
+  API_KEY: "2f5ae96c-b558-4c7b-a590-a501ae1c3f6c"
+  JWT_SECRET: "supersecret"
+
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-microservice
+  namespace: devops-microservice
+  labels:
+    app: devops-microservice
+    version: "1.0.0"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devops-microservice
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: devops-microservice
+    spec:
+      containers:
+        - name: devops-app
+          image: ghcr.io/GiruCorps/devops-microservice:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: devops-config
+            - secretRef:
+                name: devops-secrets
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            failureThreshold: 3
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+
+---
+# ─── Service (ClusterIP — exposed via Ingress) ───────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-service
+  namespace: devops-microservice
+spec:
+  selector:
+    app: devops-microservice
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: ClusterIP
+
+---
+# ─── Horizontal Pod Autoscaler (dynamic scaling) ─────────────────────────────
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: devops-hpa
+  namespace: devops-microservice
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: devops-microservice
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+---
+# ─── Ingress (NGINX Ingress Controller) ──────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: devops-ingress
+  namespace: devops-microservice
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/limit-rps: "30"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - example-domain.com
+      secretName: devops-tls
+  rules:
+    - host: example-domain.com
+      http:
+        paths:
+          - path: /DevOps
+            pathType: Prefix
+            backend:
+              service:
+                name: devops-service
+                port:
+                  number: 80
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: devops-service
+                port:
+                  number: 80
+          - path: /balancer
+            pathType: Prefix
+            backend:
+              service:
+                name: devops-service
+                port:
+                  number: 80
