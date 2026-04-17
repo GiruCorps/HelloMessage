@@ -5,15 +5,15 @@ const jwt = require("jsonwebtoken");
 const apiKey = "2f5ae96c-b558-4c7b-a590-a501ae1c3f6c";
 const secret = "supersecret";
 
+process.env.API_KEY = apiKey;
+process.env.JWT_SECRET = secret;
+
 const validBody = {
   "message": "This is a test",
   "to": "Juan Perez",
   "from": "Rita Asturia",
   "timeToLifeSec": 45
 };
-
-// const tokenJWT = require("../scripts/generate-jwt.js");
-
 
 const generateToken = () => {
   return jwt.sign(
@@ -22,13 +22,12 @@ const generateToken = () => {
     { expiresIn: '5m' }
   );
 };
-  //  jwt.sign({ user: "test" }, secret, { expiresIn: 60 });
 
 const myToken = generateToken();
 
 describe("DevOps API", () => {
 
-  test("✅ success response", async () => {
+  test("✅ Success Response", async () => {
     const res = await request(app)
       .post("/DevOps")
       .set("X-Parse-REST-API-Key", apiKey)
@@ -43,65 +42,66 @@ describe("DevOps API", () => {
     expect(res.body.message).toContain("Hello");
   });
 
-  test("Salud", async () => {
+  test("✅ Service Health", async () => {
     const res = await request(app)
       .get("/health")
     
     expect(res.statusCode).toBe(200);
   });
 
-  test("Balanceador", async () => {
+  test("✅ Balancer request", async () => {
     const res = await request(app)
       .get("/balancer")
     
     expect(res.statusCode).toBe(200);
   });
-//   test("❌ missing API key", async () => {
-//     const res = await request(app)
-//       .post("/DevOps")
-//       .set("X-JWT-KWY", generateToken())
-//       .send(validBody);
 
-//     expect(res.statusCode).toBe(401);
-//   });
+  test("❌ Missing API key", async () => {
+    const res = await request(app)
+      .post("/DevOps")
+      .set("X-JWT-KWY", myToken)
+      .send(validBody);
 
-//   test("❌ invalid API key", async () => {
-//     const res = await request(app)
-//       .post("/DevOps")
-//       .set("X-Parse-REST-API-Key", "wrong")
-//       .set("X-JWT-KWY", generateToken())
-//       .send(validBody);
+    expect(res.statusCode).toBe(401);
+  });
 
-//     expect(res.statusCode).toBe(401);
-//   });
+  test("❌ Invalid API key", async () => {
+    const res = await request(app)
+      .post("/DevOps")
+      .set("X-Parse-REST-API-Key", "wrong")
+      .set("X-JWT-KWY", myToken)
+      .send(validBody);
 
-//   test("❌ invalid body", async () => {
-//     const res = await request(app)
-//       .post("/DevOps")
-//       .set("X-Parse-REST-API-Key", apiKey)
-//       .set("X-JWT-KWY", generateToken())
-//       .send({});
+    expect(res.statusCode).toBe(401);
+  });
 
-//     expect(res.statusCode).toBe(401);
-//   });
+  test("❌ Invalid body", async () => {
+    const res = await request(app)
+      .post("/DevOps")
+      .set("X-Parse-REST-API-Key", apiKey)
+      .set("X-JWT-KWY", myToken)
+      .send({});
 
-//   test("❌ missing JWT", async () => {
-//     const res = await request(app)
-//       .post("/DevOps")
-//       .set("X-Parse-REST-API-Key", apiKey)
-//       .send(validBody);
+    expect(res.statusCode).toBe(400);
+  });
 
-//     expect(res.statusCode).toBe(401);
-//   });
+  test("❌ Missing JWT", async () => {
+    const res = await request(app)
+      .post("/DevOps")
+      .set("X-Parse-REST-API-Key", apiKey)
+      .send(validBody);
 
-//   test("❌ invalid JWT", async () => {
-//     const res = await request(app)
-//       .post("/DevOps")
-//       .set("X-Parse-REST-API-Key", apiKey)
-//       .set("X-JWT-KWY", "invalid")
-//       .send(validBody);
+    expect(res.statusCode).toBe(401);
+  });
 
-//     expect(res.statusCode).toBe(401);
-//   });
+  test("❌ Invalid JWT", async () => {
+    const res = await request(app)
+      .post("/DevOps")
+      .set("X-Parse-REST-API-Key", apiKey)
+      .set("X-JWT-KWY", "invalid")
+      .send(validBody);
+
+    expect(res.statusCode).toBe(401);
+  });
 
 });
