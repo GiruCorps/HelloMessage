@@ -90,7 +90,7 @@ jobs:
       - name: Deploy to DEV
         run: |
           echo "Deploying to DEV environment"
-          echo "Version: ${{ GITHUB_SHA }}"
+          echo "Version: ${{ github.sha }}"
           echo "Registry: ${{ env.REGISTRY }}"
 
   deploy-prod:
@@ -103,5 +103,5 @@ jobs:
       - name: Deploy to PROD
         run: |
           echo "Deploying to PROD environment"
-          echo "Version: ${{ GITHUB_SHA }}"
+          echo "Version: ${{ github.sha }}"
           echo "Registry: ${{ env.REGISTRY }}"
