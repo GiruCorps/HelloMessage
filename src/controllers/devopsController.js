@@ -15,20 +15,7 @@ exports.handleRequest = (req, res) => {
     return res.status(400).send("ERROR");
   }
 
-  const { message, to, from, timeToLifeSec } = value;
-
-  const token = jwt.sign(
-    {
-      message, 
-      to, 
-      from, 
-      nonce: Math.random()
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: timeToLifeSec
-    }
-  );
+  const { to } = value;
 
   return res.json({
     message: `Hello ${to} your message will be sent`
