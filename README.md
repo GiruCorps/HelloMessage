@@ -139,15 +139,23 @@ Coverage threshold: **80%** (branches, functions, lines, statements).
 ## CI/CD Pipeline
 
 ```
+Push to develop
+  ↓
+1. Lint & Test (ESLint static analysis + Jest + Coverage report)
+  ↓
+2. Docker Build & Push → GitHub Container Registry
+  ↓
+3. Deploy → Develop
+```
+
+```
 Push to master
   ↓
 1. Lint & Test (ESLint static analysis + Jest + Coverage report)
   ↓
 2. Docker Build & Push → GitHub Container Registry
   ↓
-3. Deploy → Develop (SSH)
-  ↓
-4. Deploy → Production (auto after code merges to main)
+3. Deploy → Production (auto after code merges to main)
 ```
 ---
 
