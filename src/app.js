@@ -22,6 +22,12 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.get("/balancer", (req, res) => {
+  res.json({ 
+    host: process.env.HOSTNAME
+  });
+});
+
 app.use((req, res) => {
   res.status(404).send("ERROR");
 });
