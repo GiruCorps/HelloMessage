@@ -35,9 +35,6 @@ describe("DevOps API", () => {
       .set("Content-Type", "application/json")
       .send(validBody);
 
-    console.log('Token generado:', myToken);
-    console.log('Body:', secret);
-    console.log('Respuesta:', res)
     expect(res.statusCode).toBe(200);
     expect(res.body.message).toContain("Hello");
   });
