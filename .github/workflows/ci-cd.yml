@@ -7,9 +7,9 @@ on:
       - develop
 
 jobs:
-  build-test:
+  linting-testing:
+    if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -28,12 +28,24 @@ jobs:
       - name: Run tests
         run: npm test
 
+  build:
+    runs-on: ubuntu-latest
+    needs: linting-testing
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - name: Build Docker
         run: docker build -t devops-app .
 
   deploy-dev:
     if: github.ref == 'refs/heads/develop'
-    needs: build-test
+    needs: build
     runs-on: ubuntu-latest
     environment: development
 
@@ -44,13 +56,13 @@ jobs:
           echo "Version: $GITHUB_SHA"
 
   deploy-prod:
-    if: github.ref == 'refs/heads/master'
-    needs: build-test
+    if: github.ref == 'refs/heads/main'
+    needs: build
     runs-on: ubuntu-latest
     environment: production
 
     steps:
       - name: Deploy to PROD
         run: |
-          echo "Deploying to PRODUCTION"
+          echo "Deploying to PROD environment"
           echo "Version: $GITHUB_SHA"
